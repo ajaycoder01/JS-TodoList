@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>To-Do App with Edit and Update</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+
+    .todo-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 70%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 5px;
+      border: none;
+      background: rgb(13, 103, 64);
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      padding: 10px;
+      background: #f9f9f9;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 4px;
+    }
+
+    li.completed span {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .actions button {
+      margin-left: 5px;
+      padding: 5px;
+      font-size: 12px;
+    }
+
+    .edit-input {
+      width: 100%;
+      margin-right: 10px;
+    }
+
+    .edit-wrapper {
+      display: flex;
+      width: 100%;
+    }
+
+    .edit-controls {
+      margin-top: 5px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    #taskList span{
+        cursor: pointer;
+        width: 150px;
+        word-wrap: break-word;
+    }
+    .fa-rectangle-list{
+        color: #115828;
+        margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="todo-container">
+  <h2><i class="fa-solid fa-rectangle-list"></i> To-Do App</h2>
+  <input type="text" id="taskInput" placeholder="Add a task">
+  <button onclick="addTask()">Add</button>
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+ // Get the reference to the <ul> or <ol> element with id="taskList"
+let taskList = document.getElementById("taskList");
+
+// Function to add a new task
+function addTask() {
+  // Get the input field where the user types the task
+  let input = document.getElementById("taskInput");
+
+  // Trim extra spaces and store the input value
+  let taskText = input.value.trim();
+
+  // Do not add a task if the input is empty
+  if (taskText === "") return;
+
+  // Create a new <li> element to represent the task
+  let li = document.createElement("li");
+
+  // Set the inner HTML of the <li> with a clickable span and two buttons (edit & delete)
+  li.innerHTML = `
+    <span onclick="toggleComplete(this)">${taskText}</span>
+    <div class="actions">
+      <button onclick="editTask(this)">
+          <i class="fa-solid fa-pen-to-square"></i></button>
+      <button onclick="deleteTask(this)" style="background:red">
+          <i class="fa-solid fa-xmark"></i></button>
+    </div>
+  `;
+
+  // Append the new task <li> to the task list
+  taskList.appendChild(li);
+
+  // Clear the input field after adding the task
+  input.value = "";
+}
+
+// Function to mark a task as completed or incomplete
+function toggleComplete(span) {
+  // Toggle the 'completed' class on the parent <li> of the span
+  span.parentElement.classList.toggle("completed");
+}
+
+// Function to delete a task
+function deleteTask(btn) {
+  // Remove the parent <li> of the clicked button
+  btn.parentElement.parentElement.remove();
+}
+
+// Function to edit an existing task
+function editTask(btn) {
+  // Get the <li> that contains the task
+  const li = btn.parentElement.parentElement;
+
+  // Get the <span> that holds the task text
+  const span = li.querySelector("span");
+
+  // Save the current text of the task
+  const oldText = span.innerText;
+
+  // Create a wrapper div for the editing section
+  const edit = document.createElement("div");
+  edit.className = "edit-wrapper";
+
+  // Create an input field pre-filled with the current task text
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = oldText;
+  input.className = "edit-input";
+
+  // Create an 'Update' button to save the edited task
+  const updateBtn = document.createElement("button");
+  updateBtn.textContent = "Update";
+  updateBtn.style.background = "green";
+
+  // When the update button is clicked:
+  updateBtn.onclick = function () {
+    // Trim the input and check for empty text
+    const newText = input.value.trim();
+    if (newText === "") return alert("Task can't be empty!");
+
+    // Create a new <span> with updated text
+    const updatedSpan = document.createElement("span");
+    updatedSpan.textContent = newText;
+
+    // Make the span clickable to toggle completion
+    updatedSpan.onclick = () => toggleComplete(updatedSpan);
+
+    // Clear the <li> content
+    li.innerHTML = "";
+
+    // Append the updated span to <li>
+    li.appendChild(updatedSpan);
+
+    // Recreate the edit/delete buttons and append to <li>
+    const actionsDiv = document.createElement("div");
+    actionsDiv.className = "actions";
+    actionsDiv.innerHTML = `
+      <button onclick="editTask(this)">
+          <i class="fa-solid fa-pen-to-square"></i></button>
+      <button onclick="deleteTask(this)" style="background:red">
+          <i class="fa-solid fa-xmark"></i></button>`;
+    li.appendChild(actionsDiv);
+  };
+
+  // Create a container to hold the update button
+  const controls = document.createElement("div");
+  controls.className = "edit-controls";
+  controls.appendChild(updateBtn);
+
+  // Add the input and button to the edit wrapper
+  edit.appendChild(input);
+  edit.appendChild(controls);
+
+  // Replace current task content with the edit form
+  li.innerHTML = "";
+  li.appendChild(edit);
+}
+
+</script>
+
+</body>
+</html>
